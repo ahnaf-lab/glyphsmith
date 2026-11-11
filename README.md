@@ -33,55 +33,71 @@ change to the generator, rasterizer, or BDF writer that silently shifts
 output for an existing seed gets caught even though nothing in those tests
 calls the code twice to compare against itself.
 
+This milestone polishes the CLI into a one-liner: running `glyphsmith
+"my-repo-name"` with no other flags now writes `specimen.png` and
+`font.bdf` for that seed directly, instead of requiring `--png`/`--bdf` to
+opt in to each file. A `glyphsmith` console command is registered so the
+tool is runnable by name after installing the package, not just via
+`python3 -m glyphsmith`. The old per-glyph ASCII dump is still available,
+now behind an explicit `--preview` flag, and `--out-dir` controls where the
+default `specimen.png`/`font.bdf` land.
+
 ## Install
 
 Requires Python 3.9+. glyphsmith has no runtime dependencies — everything
-is built on the standard library (`random`, `hashlib`, `argparse`).
+is built on the standard library (`random`, `hashlib`, `argparse`, `zlib`).
 
 ```
 git clone <this-repository>
 cd glyphsmith
+pip install -e .
 ```
 
-No build or install step is required to run it.
+This registers a `glyphsmith` command. You can also skip installing and
+run it as `python3 -m glyphsmith` from the repository root.
 
 ## Usage
 
-Preview the glyphs a seed generates, as ASCII art, from the command line:
+The one-liner: forge a typeface for a seed and write both a specimen image
+and a loadable font file into the current directory:
 
 ```
-python3 -m glyphsmith "my-project-name"
+glyphsmith "my-repo-name"
+```
+
+This writes `specimen.png` (a rendered sheet of every supported glyph) and
+`font.bdf` (the same glyphs as a BDF bitmap font) and prints the paths it
+wrote. Write them somewhere else with `--out-dir`:
+
+```
+glyphsmith "my-repo-name" --out-dir build/
 ```
 
 Render only a subset of characters:
 
 ```
-python3 -m glyphsmith "my-project-name" --chars "ABC123"
+glyphsmith "my-repo-name" --chars "ABC123"
 ```
 
-Customize the ink/blank characters used in the preview:
+Override the specimen/font paths individually, and tune the specimen
+layout (`--columns` per row) and PNG pixel scale:
 
 ```
-python3 -m glyphsmith "my-project-name" --chars "HELLO" --on "X" --off " "
+glyphsmith "my-repo-name" --png build/specimen.png --bdf build/myfont.bdf --columns 13 --scale 8
 ```
 
-Preview the whole typeface as one composed ASCII specimen sheet (glyphs wrap
-into rows, `--columns` per row):
+Also print the composed specimen sheet as ASCII art alongside writing the
+files:
 
 ```
-python3 -m glyphsmith "my-project-name" --specimen --columns 13
+glyphsmith "my-repo-name" --specimen
 ```
 
-Export the specimen sheet as a PNG image instead, scaled up for visibility:
+Print each glyph as a separate ASCII art block instead of writing any
+files, customizing the ink/blank characters used:
 
 ```
-python3 -m glyphsmith "my-project-name" --png specimen.png --columns 13 --scale 8
-```
-
-Export the requested glyphs as a loadable BDF bitmap font file:
-
-```
-python3 -m glyphsmith "my-project-name" --bdf myfont.bdf
+glyphsmith "my-repo-name" --chars "HELLO" --preview --on "X" --off " "
 ```
 
 Or use it as a library:
