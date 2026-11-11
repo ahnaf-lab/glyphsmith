@@ -11,12 +11,20 @@ recognizable; the seed only controls the stroke weight, slant, and small
 per-point jitter layered on top, so different seeds produce visibly
 different but still legible styles of the same letterforms.
 
-This milestone adds the specimen sheet: all requested glyphs for a seed are
-composed onto one shared canvas (wrapping into rows) and can be previewed as
-ASCII art or exported as a real PNG image, so a whole typeface can be seen
-at a glance instead of one glyph at a time. The PNG is written with a small
-hand-rolled encoder built on `struct` and `zlib` from the standard library,
-so no image library dependency is needed.
+The previous milestone added the specimen sheet: all requested glyphs for a
+seed are composed onto one shared canvas (wrapping into rows) and can be
+previewed as ASCII art or exported as a real PNG image, so a whole typeface
+can be seen at a glance instead of one glyph at a time. The PNG is written
+with a small hand-rolled encoder built on `struct` and `zlib` from the
+standard library, so no image library dependency is needed.
+
+This milestone adds a BDF (Glyph Bitmap Distribution Format) exporter: the
+requested glyphs for a seed are written out as a plain-text `.bdf` bitmap
+font file, the same format produced by classic X11 font tools. BDF is just
+structured text, so the exporter is a small hand-rolled text writer with no
+font-tooling dependency; the resulting file can be loaded directly by
+terminal emulators, image/font editors (e.g. FontForge), and converters
+like `bdftopcf` that expect a standard bitmap font.
 
 ## Install
 
@@ -63,16 +71,24 @@ Export the specimen sheet as a PNG image instead, scaled up for visibility:
 python3 -m glyphsmith "my-project-name" --png specimen.png --columns 13 --scale 8
 ```
 
+Export the requested glyphs as a loadable BDF bitmap font file:
+
+```
+python3 -m glyphsmith "my-project-name" --bdf myfont.bdf
+```
+
 Or use it as a library:
 
 ```python
-from glyphsmith import generate_glyph, render_glyph_ascii, compose_specimen, write_png
+from glyphsmith import generate_glyph, render_glyph_ascii, compose_specimen, write_png, write_bdf
 
 bitmap = generate_glyph("my-project-name", "A")
 print(render_glyph_ascii(bitmap))
 
 sheet = compose_specimen("my-project-name", "ABCDEFGHIJKLM", columns=13)
 write_png(sheet, "specimen.png", scale=8)
+
+write_bdf("my-project-name", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", "myfont.bdf")
 ```
 
 `generate_glyph(seed, char)` returns a 2D list of `0`/`1` pixels. The same
@@ -80,6 +96,8 @@ write_png(sheet, "specimen.png", scale=8)
 `compose_specimen(seed, chars, columns)` lays those glyph bitmaps out on one
 larger 2D list of `0`/`1` pixels, which `render_specimen_ascii` or
 `write_png`/`encode_png` can then turn into ASCII art or a `.png` file.
+`write_bdf(seed, chars, path)`/`encode_bdf(seed, chars)` render those same
+glyphs as the text of a standard BDF bitmap font file.
 
 ## Status
 

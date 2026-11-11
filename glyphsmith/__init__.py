@@ -1,5 +1,6 @@
 """glyphsmith: forge a deterministic bitmap typeface from a seed string."""
 
+from .bdf_writer import encode_bdf, write_bdf
 from .glyphs import SUPPORTED_CHARS, font_style, generate_glyph, render_glyph_ascii
 from .png_writer import encode_png, write_png
 from .raster import CANVAS_HEIGHT, CANVAS_WIDTH
@@ -16,6 +17,8 @@ __all__ = [
     "render_specimen_ascii",
     "encode_png",
     "write_png",
+    "encode_bdf",
+    "write_bdf",
 ]
 
 __version__ = "0.1.0"

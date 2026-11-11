@@ -58,6 +58,19 @@ class CliTests(unittest.TestCase):
                 header = handle.read(8)
             self.assertEqual(header, b"\x89PNG\r\n\x1a\n")
 
+    def test_bdf_flag_writes_a_loadable_bdf_file(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = os.path.join(tmp_dir, "font.bdf")
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                exit_code = main(["acme-corp", "--chars", "AB", "--bdf", path])
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(out.getvalue(), "")
+            with open(path, "r", encoding="ascii") as handle:
+                content = handle.read()
+            self.assertTrue(content.startswith("STARTFONT 2.1\n"))
+            self.assertIn("CHARS 2\n", content)
+
     def test_invalid_columns_exits_nonzero(self):
         out = io.StringIO()
         with self.assertRaises(SystemExit) as ctx:

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 from typing import List, Optional
 
+from .bdf_writer import write_bdf
 from .glyphs import SUPPORTED_CHARS, generate_glyph, render_glyph_ascii
 from .png_writer import write_png
 from .specimen import compose_specimen, render_specimen_ascii
@@ -45,6 +46,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=8,
         help="pixel scale factor used when writing a PNG specimen sheet (default: 8)",
     )
+    parser.add_argument(
+        "--bdf",
+        metavar="PATH",
+        help="write the glyphs for --chars to PATH as a loadable BDF bitmap font file",
+    )
     return parser
 
 
@@ -56,19 +62,25 @@ def main(argv: Optional[List[str]] = None) -> int:
     if unsupported:
         parser.error(f"unsupported character(s): {''.join(unsupported)!r}")
 
-    if args.specimen or args.png:
-        if args.columns < 1:
-            parser.error("--columns must be at least 1")
-        if args.scale < 1:
-            parser.error("--scale must be at least 1")
+    if args.bdf:
+        if not args.chars:
+            parser.error("--bdf requires at least one character in --chars")
+        write_bdf(args.seed, args.chars, args.bdf)
 
-        sheet = compose_specimen(args.seed, args.chars, args.columns)
+    if args.specimen or args.png or args.bdf:
+        if args.specimen or args.png:
+            if args.columns < 1:
+                parser.error("--columns must be at least 1")
+            if args.scale < 1:
+                parser.error("--scale must be at least 1")
 
-        if args.specimen:
-            print(render_specimen_ascii(sheet, on=args.on, off=args.off))
+            sheet = compose_specimen(args.seed, args.chars, args.columns)
 
-        if args.png:
-            write_png(sheet, args.png, scale=args.scale)
+            if args.specimen:
+                print(render_specimen_ascii(sheet, on=args.on, off=args.off))
+
+            if args.png:
+                write_png(sheet, args.png, scale=args.scale)
 
         return 0
 
