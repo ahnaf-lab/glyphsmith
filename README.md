@@ -18,13 +18,20 @@ can be seen at a glance instead of one glyph at a time. The PNG is written
 with a small hand-rolled encoder built on `struct` and `zlib` from the
 standard library, so no image library dependency is needed.
 
-This milestone adds a BDF (Glyph Bitmap Distribution Format) exporter: the
-requested glyphs for a seed are written out as a plain-text `.bdf` bitmap
-font file, the same format produced by classic X11 font tools. BDF is just
-structured text, so the exporter is a small hand-rolled text writer with no
-font-tooling dependency; the resulting file can be loaded directly by
-terminal emulators, image/font editors (e.g. FontForge), and converters
-like `bdftopcf` that expect a standard bitmap font.
+The previous milestone added a BDF (Glyph Bitmap Distribution Format)
+exporter: the requested glyphs for a seed are written out as a plain-text
+`.bdf` bitmap font file, the same format produced by classic X11 font
+tools. BDF is just structured text, so the exporter is a small hand-rolled
+text writer with no font-tooling dependency; the resulting file can be
+loaded directly by terminal emulators, image/font editors (e.g. FontForge),
+and converters like `bdftopcf` that expect a standard bitmap font.
+
+This milestone adds golden-file tests: for a fixed seed, the exact glyph
+bitmap arrays and the exact BDF file bytes are pinned against values
+committed under `tests/golden/` (and one inline literal), so a future
+change to the generator, rasterizer, or BDF writer that silently shifts
+output for an existing seed gets caught even though nothing in those tests
+calls the code twice to compare against itself.
 
 ## Install
 
